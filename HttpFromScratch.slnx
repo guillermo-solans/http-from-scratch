@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HttpClientApp/HttpClientApp.csproj" />
+    <Project Path="src/HttpLib/HttpLib.csproj" />
+    <Project Path="src/HttpServerApp/HttpServerApp.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cats from Scratch — HTTP/1.1 over raw sockets</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #1e293b;
+      --accent: #f97316;
+      --accent-soft: #fb923c;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --ok: #22c55e;
+      --err: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #1a1a3e 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 4rem 2rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid #334155;
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    header p {
+      color: var(--muted);
+      max-width: 720px;
+      margin: 0.5rem auto 0;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      gap: 2rem;
+    }
+
+    section {
+      background: var(--bg-soft);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    section h2 {
+      margin-top: 0;
+      color: var(--accent-soft);
+      font-size: 1.4rem;
+    }
+
+    code, pre {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+    }
+
+    pre {
+      background: #0b1220;
+      border: 1px solid #1e293b;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    .endpoints {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .endpoint {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: #0b1220;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+    }
+
+    .method {
+      font-weight: 700;
+      font-family: monospace;
+      letter-spacing: 0.05em;
+    }
+    .method.get { color: #38bdf8; }
+    .method.post { color: #22c55e; }
+    .method.put { color: #facc15; }
+    .method.delete { color: #ef4444; }
+
+    .playground {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    button {
+      background: var(--accent);
+      color: #0b0b0b;
+      border: 0;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.2s ease;
+    }
+
+    button:hover { background: var(--accent-soft); }
+    button:active { transform: translateY(1px); }
+
+    #output {
+      min-height: 80px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 600px) {
+      .endpoint { grid-template-columns: 60px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cats from Scratch</h1>
+    <p>An HTTP/1.1 server built directly on top of raw TCP sockets — no <code>HttpListener</code>, no Kestrel, no ASP.NET. Just <code>System.Net.Sockets</code> and a lot of <code>\r\n</code>.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>What is this?</h2>
+      <p>You are talking to a tiny C# program that opens a TCP socket on a port, parses HTTP requests byte by byte, routes them, and writes responses with hand-built status lines and headers. The page you are reading was served by that same loop.</p>
+    </section>
+
+    <section>
+      <h2>REST endpoints</h2>
+      <div class="endpoints">
+        <div class="endpoint"><span class="method get">GET</span><code>/cats</code></div>
+        <div class="endpoint"><span class="method get">GET</span><code>/cats/:id</code></div>
+        <div class="endpoint"><span class="method post">POST</span><code>/cats</code> — JSON body { name, breed, age }</div>
+        <div class="endpoint"><span class="method put">PUT</span><code>/cats/:id</code> — JSON body</div>
+        <div class="endpoint"><span class="method delete">DELETE</span><code>/cats/:id</code></div>
+      </div>
+    </section>
+
+    <section class="playground">
+      <h2>Try it from the browser</h2>
+      <div class="controls">
+        <button data-action="list">GET /cats</button>
+        <button data-action="get-one">GET /cats/1</button>
+        <button data-action="create">POST a new cat</button>
+        <button data-action="update">PUT /cats/1</button>
+        <button data-action="delete">DELETE /cats/2</button>
+      </div>
+      <pre id="output">Click any button to send a request.</pre>
+    </section>
+
+    <section>
+      <h2>Curl recipes</h2>
+      <pre>curl -i http://localhost:8080/cats
+curl -i http://localhost:8080/cats/1
+curl -i -X POST http://localhost:8080/cats \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Simba","breed":"Bengal","age":4}'
+curl -i -X PUT http://localhost:8080/cats/1 \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Luna","breed":"Siberian","age":4}'
+curl -i -X DELETE http://localhost:8080/cats/3</pre>
+    </section>
+  </main>
+
+  <footer>Served on a hand-rolled TCP listener. Concurrency by <code>async</code>/<code>await</code>.</footer>
+
+  <script>
+    const output = document.getElementById('output');
+
+    async function send(method, path, body) {
+      output.textContent = `> ${method} ${path}\nWaiting...`;
+      try {
+        const init = { method, headers: {} };
+        if (body !== undefined) {
+          init.headers['Content-Type'] = 'application/json';
+          init.body = JSON.stringify(body);
+        }
+        const res = await fetch(path, init);
+        const text = await res.text();
+        let pretty = text;
+        try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch {}
+        output.textContent = `< ${res.status} ${res.statusText}\n${pretty || '(empty body)'}`;
+      } catch (err) {
+        output.textContent = `! ${err.message}`;
+      }
+    }
+
+    document.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switch (btn.dataset.action) {
+          case 'list':    return send('GET', '/cats');
+          case 'get-one': return send('GET', '/cats/1');
+          case 'create':  return send('POST', '/cats', { name: 'Simba', breed: 'Bengal', age: 4 });
+          case 'update':  return send('PUT', '/cats/1', { name: 'Luna', breed: 'Siberian', age: 4 });
+          case 'delete':  return send('DELETE', '/cats/2');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
