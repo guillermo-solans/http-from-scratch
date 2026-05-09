@@ -19,8 +19,8 @@ public static class UrlParser
             working = working[(schemeIdx + 3)..];
         }
 
-        if (scheme != "http")
-            throw new NotSupportedException($"Scheme '{scheme}' is not supported. Only http:// is allowed.");
+        if (scheme != "http" && scheme != "https")
+            throw new NotSupportedException($"Scheme '{scheme}' is not supported. Only http:// and https:// are allowed.");
 
         string path = "/";
         var pathIdx = working.IndexOf('/');
@@ -35,7 +35,7 @@ public static class UrlParser
             path = "/";
 
         string host;
-        int port = 80;
+        int port = scheme == "https" ? 443 : 80;
 
         var portIdx = working.LastIndexOf(':');
         if (portIdx >= 0)

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(pip install *)"
+      "PowerShell(pip install *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet run *)"
     ]
   }
 }

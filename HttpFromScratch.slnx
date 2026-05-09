@@ -3,5 +3,6 @@
     <Project Path="src/HttpClientApp/HttpClientApp.csproj" />
     <Project Path="src/HttpLib/HttpLib.csproj" />
     <Project Path="src/HttpServerApp/HttpServerApp.csproj" />
+    <Project Path="src/TlsLib/TlsLib.csproj" />
   </Folder>
 </Solution>

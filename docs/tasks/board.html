@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Kanban - TLS Project</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#0f1115; color:#e6e6e6; margin:0; padding:16px; }
+  h1 { margin:0 0 4px 0; font-size: 22px; }
+  .meta { color:#9aa0a6; font-size: 13px; margin-bottom: 16px; }
+  .board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .col { background:#161922; border:1px solid #232733; border-radius:10px; padding:10px; min-height: 200px; }
+  .col h2 { margin:0 0 8px 0; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color:#cfd3da; display:flex; justify-content:space-between; }
+  .count { background:#232733; color:#9aa0a6; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
+  .card { background:#1c2030; border:1px solid #2a2f40; border-radius:8px; padding:8px; margin-bottom:8px; font-size: 12px; }
+  .card .id { color:#9aa0a6; font-size: 10px; letter-spacing: .5px; }
+  .card .title { font-weight: 600; margin: 2px 0 6px; }
+  .badges { display:flex; flex-wrap: wrap; gap: 4px; }
+  .badge { font-size: 10px; padding: 1px 6px; border-radius: 999px; background:#2a2f40; color:#cfd3da; }
+  .p-critical { background:#5a1a1a; color:#ffd6d6; }
+  .p-high     { background:#5a3a1a; color:#ffe2c2; }
+  .p-medium   { background:#1a4a5a; color:#c2eeff; }
+  .p-low      { background:#23394d; color:#c2d4ff; }
+  .ph-1 { background:#284f3a; color:#c8f4d8; }
+  .ph-2 { background:#2c4a5a; color:#c8e8f6; }
+  .ph-3 { background:#4a3a5a; color:#e8d6f6; }
+  .ph-4 { background:#5a4a2a; color:#f6e8c8; }
+  .ph-5 { background:#5a2a4a; color:#f6c8e0; }
+  .assignee { color:#a3d6ff; }
+</style>
+</head>
+<body>
+<h1>Kanban — TLS Avanzado sobre TCP raw</h1>
+<div class="meta">Approach: TLS 1.2 ECDHE_RSA_WITH_AES_128_GCM_SHA256. Entrega: 2026-05-13. PM: software-factory.</div>
+<div class="board" id="board"></div>
+
+<script>
+const tasks = [
+  { id: "TASK-001", title: "TlsLib csproj + estructura + constantes",           status: "todo", priority: "critical", phase: "fase-1", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-002", title: "BigEndianReader/Writer + SecureRandom",              status: "todo", priority: "critical", phase: "fase-1", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-003", title: "Generador certificado X.509 RSA-2048",               status: "todo", priority: "high",     phase: "fase-1", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-004", title: "PrfSha256 + KeyDerivation",                          status: "todo", priority: "critical", phase: "fase-1", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-005", title: "EcdheP256 + RsaSigner + AesGcmCipher",               status: "todo", priority: "critical", phase: "fase-1", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-006", title: "TlsRecord + Reader + Writer",                        status: "todo", priority: "critical", phase: "fase-2", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-007", title: "HandshakeReader + HandshakeWriter",                  status: "todo", priority: "high",     phase: "fase-2", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-008", title: "HandshakeHash (acumulador SHA256)",                  status: "todo", priority: "high",     phase: "fase-2", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-009", title: "ClientHello",                                        status: "todo", priority: "critical", phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-010", title: "ServerHello",                                        status: "todo", priority: "critical", phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-011", title: "CertificateMessage",                                 status: "todo", priority: "critical", phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-012", title: "ServerKeyExchange (ECDHE + firma RSA)",              status: "todo", priority: "critical", phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-013", title: "ServerHelloDone + ClientKeyExchange",                status: "todo", priority: "high",     phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-014", title: "FinishedMessage (verify_data)",                      status: "todo", priority: "critical", phase: "fase-3", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-015", title: "TlsConnectionState + HandshakeContext",              status: "todo", priority: "critical", phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-016", title: "HandshakeStateMachine — CLIENTE",                    status: "todo", priority: "critical", phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-017", title: "HandshakeStateMachine — SERVIDOR",                   status: "todo", priority: "critical", phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-018", title: "TlsStream (Read/Write con AES-GCM)",                 status: "todo", priority: "critical", phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-019", title: "TlsClientFactory + TlsServerFactory + Options",      status: "todo", priority: "high",     phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-020", title: "Integrar TLS en SocketHttpClient",                   status: "todo", priority: "high",     phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-021", title: "Integrar TLS en HttpServer",                         status: "todo", priority: "high",     phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-022", title: "CLI flags --tls",                                    status: "todo", priority: "medium",   phase: "fase-4", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-023", title: "Test E2E handshake",                                 status: "todo", priority: "critical", phase: "fase-5", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-024", title: "Captura Wireshark + walkthrough",                    status: "todo", priority: "high",     phase: "fase-5", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+  { id: "TASK-025", title: "README de TlsLib + demo guide",                      status: "todo", priority: "high",     phase: "fase-5", assignee: "unassigned", comments: 1, created: "2026-05-09" },
+];
+
+const columns = ["backlog", "todo", "in-progress", "review", "done", "blocked"];
+const labels = { "backlog": "Backlog", "todo": "Todo", "in-progress": "In Progress", "review": "Review", "done": "Done", "blocked": "Blocked" };
+const phaseClass = { "fase-1": "ph-1", "fase-2": "ph-2", "fase-3": "ph-3", "fase-4": "ph-4", "fase-5": "ph-5" };
+
+const board = document.getElementById("board");
+columns.forEach(col => {
+  const items = tasks.filter(t => t.status === col);
+  const div = document.createElement("div");
+  div.className = "col";
+  div.innerHTML = `<h2>${labels[col]} <span class="count">${items.length}</span></h2>`;
+  items.forEach(t => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="id">${t.id}</div>
+      <div class="title">${t.title}</div>
+      <div class="badges">
+        <span class="badge p-${t.priority}">${t.priority}</span>
+        <span class="badge ${phaseClass[t.phase]}">${t.phase}</span>
+        <span class="badge assignee">@${t.assignee}</span>
+      </div>`;
+    div.appendChild(card);
+  });
+  board.appendChild(div);
+});
+</script>
+</body>
+</html>

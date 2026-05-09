@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using HttpLib;
+using TlsLib;
 
 namespace HttpServerApp.Server;
 
@@ -9,19 +11,26 @@ public class HttpServer
     private readonly int _port;
     private readonly Router _router;
     private readonly Func<HttpRequest, Task<HttpResponse>>? _fallback;
+    private readonly X509Certificate2? _tlsCertificate;
 
-    public HttpServer(int port, Router router, Func<HttpRequest, Task<HttpResponse>>? fallback = null)
+    public HttpServer(
+        int port,
+        Router router,
+        Func<HttpRequest, Task<HttpResponse>>? fallback = null,
+        X509Certificate2? tlsCertificate = null)
     {
         _port = port;
         _router = router;
         _fallback = fallback;
+        _tlsCertificate = tlsCertificate;
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         var listener = new TcpListener(IPAddress.Any, _port);
         listener.Start();
-        Console.WriteLine($"[server] Listening on http://localhost:{_port}");
+        var scheme = _tlsCertificate is not null ? "https" : "http";
+        Console.WriteLine($"[server] Listening on {scheme}://localhost:{_port}");
 
         cancellationToken.Register(listener.Stop);
 
@@ -60,38 +69,67 @@ public class HttpServer
         try
         {
             using (client)
-            await using (var stream = client.GetStream())
+            await using (var rawStream = client.GetStream())
             {
-                HttpRequest? request;
+                Stream stream = rawStream;
+                TlsStream? tlsStream = null;
+
+                if (_tlsCertificate is not null)
+                {
+                    try
+                    {
+                        var tlsOptions = new TlsServerOptions
+                        {
+                            ServerCertificate = _tlsCertificate,
+                            Logger = msg => Console.WriteLine($"[server][tls][{remoteEndPoint}] {msg}")
+                        };
+                        tlsStream = TlsServerFactory.Accept(rawStream, tlsOptions);
+                        stream = tlsStream;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[server] TLS handshake failed from {remoteEndPoint}: {ex.Message}");
+                        return;
+                    }
+                }
+
                 try
                 {
-                    request = await RequestReader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex) when (ex is InvalidDataException or IOException or FormatException)
-                {
-                    var bad = HttpResponse.Create(400, "Bad Request");
-                    await SendAsync(stream, bad, cancellationToken).ConfigureAwait(false);
-                    Console.WriteLine($"[server] {remoteEndPoint} BAD_REQUEST 400 ({ex.Message})");
-                    return;
-                }
+                    HttpRequest? request;
+                    try
+                    {
+                        request = await RequestReader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex) when (ex is InvalidDataException or IOException or FormatException)
+                    {
+                        var bad = HttpResponse.Create(400, "Bad Request");
+                        await SendAsync(stream, bad, cancellationToken).ConfigureAwait(false);
+                        Console.WriteLine($"[server] {remoteEndPoint} BAD_REQUEST 400 ({ex.Message})");
+                        return;
+                    }
 
-                if (request is null)
-                    return;
+                    if (request is null)
+                        return;
 
-                HttpResponse response;
-                try
-                {
-                    response = await DispatchAsync(request).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[server] Unhandled error: {ex}");
-                    response = HttpResponse.Create(500, "Internal Server Error");
-                }
+                    HttpResponse response;
+                    try
+                    {
+                        response = await DispatchAsync(request).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[server] Unhandled error: {ex}");
+                        response = HttpResponse.Create(500, "Internal Server Error");
+                    }
 
-                Decorate(response);
-                await SendAsync(stream, response, cancellationToken).ConfigureAwait(false);
-                Console.WriteLine($"[server] {remoteEndPoint} {request.Method} {request.Path} -> {response.StatusCode}");
+                    Decorate(response);
+                    await SendAsync(stream, response, cancellationToken).ConfigureAwait(false);
+                    Console.WriteLine($"[server] {remoteEndPoint} {request.Method} {request.Path} -> {response.StatusCode}");
+                }
+                finally
+                {
+                    tlsStream?.Dispose();
+                }
             }
         }
         catch (Exception ex)
