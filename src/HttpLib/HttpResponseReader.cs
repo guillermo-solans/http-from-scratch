@@ -91,6 +91,13 @@ public static class HttpResponseReader
 
             var name = lines[i][..colonIdx].Trim();
             var value = lines[i][(colonIdx + 1)..].Trim();
+
+            if (string.Equals(name, "Set-Cookie", StringComparison.OrdinalIgnoreCase))
+            {
+                response.SetCookies.Add(value);
+                continue;
+            }
+
             response.Headers[name] = value;
         }
 

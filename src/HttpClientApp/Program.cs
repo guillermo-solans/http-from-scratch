@@ -1,6 +1,8 @@
 using HttpClientApp;
 using HttpLib;
 
+var cookieJar = new CookieJar();
+
 PrintBanner();
 
 while (true)
@@ -30,7 +32,7 @@ while (true)
 
         try
         {
-            var (response, elapsed) = SocketHttpClient.Send(request, url);
+            var (response, elapsed) = SocketHttpClient.Send(request, url, cookieJar: cookieJar);
             PrintResponse(response, elapsed);
         }
         catch (Exception ex)
@@ -173,6 +175,8 @@ static void PrintResponse(HttpResponse response, TimeSpan elapsed)
     Console.WriteLine("Headers:");
     foreach (var h in response.Headers)
         Console.WriteLine($"  {h.Key}: {h.Value}");
+    foreach (var sc in response.SetCookies)
+        Console.WriteLine($"  Set-Cookie: {sc}");
 
     Console.WriteLine();
     Console.WriteLine("Body:");

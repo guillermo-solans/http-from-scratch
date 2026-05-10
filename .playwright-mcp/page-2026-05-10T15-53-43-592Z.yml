@@ -1,0 +1,75 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: "{ }"
+      - generic [ref=e7]:
+        - heading "Cats HTTP Client" [level=1] [ref=e8]
+        - paragraph [ref=e9]: Talking to a hand-rolled HTTP/1.1 server over raw TCP sockets
+    - navigation [ref=e10]:
+      - link "← Landing" [ref=e11] [cursor=pointer]:
+        - /url: /
+      - button "⟨ Hide history" [pressed] [ref=e12] [cursor=pointer]
+  - main [ref=e13]:
+    - complementary [ref=e14]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - heading "History" [level=2] [ref=e18]
+          - button "Clear" [disabled] [ref=e19]
+        - paragraph [ref=e20]: No requests sent yet.
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Request" [level=2] [ref=e23]
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - combobox [ref=e27] [cursor=pointer]:
+              - option "GET" [selected]
+              - option "POST"
+              - option "PUT"
+              - option "PATCH"
+              - option "DELETE"
+              - option "HEAD"
+              - option "OPTIONS"
+            - textbox "http://localhost:8080/cats" [ref=e28]
+            - button "Send" [ref=e29] [cursor=pointer]
+          - generic [ref=e30]:
+            - generic [ref=e31]: "Quick:"
+            - button "GET List cats" [ref=e32] [cursor=pointer]:
+              - generic [ref=e33]: GET
+              - generic [ref=e34]: List cats
+            - 'button "GET Get cat #1" [ref=e35] [cursor=pointer]':
+              - generic [ref=e36]: GET
+              - generic [ref=e37]: "Get cat #1"
+            - button "POST Create cat" [ref=e38] [cursor=pointer]:
+              - generic [ref=e39]: POST
+              - generic [ref=e40]: Create cat
+            - 'button "PUT Update cat #1" [ref=e41] [cursor=pointer]':
+              - generic [ref=e42]: PUT
+              - generic [ref=e43]: "Update cat #1"
+            - 'button "DELETE Delete cat #1" [ref=e44] [cursor=pointer]':
+              - generic [ref=e45]: DELETE
+              - generic [ref=e46]: "Delete cat #1"
+            - button "GET List cookies" [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]: GET
+              - generic [ref=e49]: List cookies
+            - button "POST Set cookie" [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: POST
+              - generic [ref=e52]: Set cookie
+            - button "GET Static index" [ref=e53] [cursor=pointer]:
+              - generic [ref=e54]: GET
+              - generic [ref=e55]: Static index
+          - group "Headers + Add header" [ref=e56]:
+            - generic [ref=e57]:
+              - text: Headers
+              - button "+ Add header" [ref=e58] [cursor=pointer]
+            - generic [ref=e59]:
+              - checkbox [checked] [ref=e61]
+              - textbox "Header name" [ref=e62]: Accept
+              - textbox "Value" [ref=e63]: application/json
+              - button "Remove header" [ref=e64] [cursor=pointer]: ×
+      - generic [ref=e65]:
+        - heading "Response" [level=2] [ref=e66]
+        - generic [ref=e70]:
+          - generic [ref=e71]: ↗
+          - paragraph [ref=e72]: Send a request to see the response here.
+          - paragraph [ref=e73]: "Tip: try one of the quick actions above."
+  - contentinfo [ref=e74]: Served on a hand-rolled TCP listener · Built with Angular standalone components

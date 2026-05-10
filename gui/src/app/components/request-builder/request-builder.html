@@ -1,0 +1,122 @@
+@let req = request();
+
+<form class="builder" (ngSubmit)="onSubmit()">
+  <div class="row url-row">
+    <select
+      class="method-select"
+      [class]="methodColor(req.method)"
+      [ngModel]="req.method"
+      name="method"
+      (ngModelChange)="onMethodChange($event)"
+      [disabled]="sending()"
+    >
+      @for (m of methods; track m) {
+        <option [value]="m">{{ m }}</option>
+      }
+    </select>
+
+    <input
+      type="text"
+      class="url-input"
+      placeholder="http://localhost:8080/cats"
+      [ngModel]="req.url"
+      name="url"
+      (ngModelChange)="onUrlChange($event)"
+      [disabled]="sending()"
+      autocomplete="off"
+      spellcheck="false"
+    />
+
+    <button type="submit" class="send-btn" [disabled]="sending()">
+      @if (sending()) {
+        <span class="dot-pulse" aria-hidden="true"></span>
+        Sending…
+      } @else {
+        Send
+      }
+    </button>
+  </div>
+
+  <div class="quick-actions">
+    <span class="label">Quick:</span>
+    @for (action of quickActions; track action.label) {
+      <button
+        type="button"
+        class="quick-btn"
+        [class]="methodColor(action.method)"
+        (click)="applyQuickAction(action)"
+        [disabled]="sending()"
+      >
+        <span class="qa-method">{{ action.method }}</span>
+        <span class="qa-label">{{ action.label }}</span>
+      </button>
+    }
+  </div>
+
+  <fieldset class="headers" [disabled]="sending()">
+    <legend>
+      Headers
+      <button type="button" class="add-btn" (click)="addHeader()">+ Add header</button>
+    </legend>
+
+    @if (req.headers.length === 0) {
+      <p class="empty">No custom headers. Click "Add header" to add one.</p>
+    }
+
+    @for (header of req.headers; track $index; let i = $index) {
+      <div class="header-row">
+        <label class="check">
+          <input
+            type="checkbox"
+            [ngModel]="header.enabled"
+            [name]="'h-en-' + i"
+            (ngModelChange)="onHeaderEnabledChange(i, $event)"
+          />
+        </label>
+        <input
+          type="text"
+          class="header-key"
+          placeholder="Header name"
+          [ngModel]="header.key"
+          [name]="'h-k-' + i"
+          (ngModelChange)="onHeaderKeyChange(i, $event)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <input
+          type="text"
+          class="header-value"
+          placeholder="Value"
+          [ngModel]="header.value"
+          [name]="'h-v-' + i"
+          (ngModelChange)="onHeaderValueChange(i, $event)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="button" class="remove-btn" (click)="removeHeader(i)" aria-label="Remove header">
+          ×
+        </button>
+      </div>
+    }
+  </fieldset>
+
+  @if (showBody()) {
+    <div class="body-block">
+      <div class="body-header">
+        <span>Body (JSON)</span>
+        <button type="button" class="format-btn" (click)="formatBody()" [disabled]="sending()">
+          Format JSON
+        </button>
+      </div>
+      <textarea
+        class="body-textarea"
+        rows="8"
+        spellcheck="false"
+        placeholder='{ "name": "Simba", "breed": "Bengal", "age": 4 }'
+        [ngModel]="req.body"
+        name="body"
+        (ngModelChange)="onBodyChange($event)"
+      ></textarea>
+    </div>
+  }
+</form>

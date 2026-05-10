@@ -6,8 +6,15 @@ namespace HttpClientApp;
 
 public static class SocketHttpClient
 {
-    public static (HttpResponse Response, TimeSpan Elapsed) Send(HttpRequest request, ParsedUrl url, int timeoutMs = 30000)
+    public static (HttpResponse Response, TimeSpan Elapsed) Send(HttpRequest request, ParsedUrl url, int timeoutMs = 30000, CookieJar? cookieJar = null)
     {
+        if (cookieJar is not null)
+        {
+            var cookieHeader = cookieJar.BuildCookieHeader(request.Path);
+            if (!string.IsNullOrEmpty(cookieHeader))
+                request.Headers["Cookie"] = cookieHeader;
+        }
+
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         using var tcp = new TcpClient
@@ -28,6 +35,9 @@ public static class SocketHttpClient
         var response = HttpResponseReader.ReadFromStream(stream, isHead);
 
         sw.Stop();
+
+        cookieJar?.IngestFromResponse(response, request.Path);
+
         return (response, sw.Elapsed);
     }
 }

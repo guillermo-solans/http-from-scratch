@@ -7,6 +7,8 @@ public class HttpRequest
     public string Version { get; set; } = "HTTP/1.1";
     public Dictionary<string, string> Headers { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string Body { get; set; } = "";
+    public Dictionary<string, string> Cookies { get; } = new(StringComparer.Ordinal);
+    public Dictionary<string, object> Items { get; } = new(StringComparer.Ordinal);
 
     public byte[] Serialize()
     {

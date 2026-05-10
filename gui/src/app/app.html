@@ -1,0 +1,63 @@
+<div class="shell" [class.sidebar-collapsed]="!sidebarOpen()">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">{{ '{ }' }}</div>
+      <div>
+        <h1>Cats HTTP Client</h1>
+        <p>Talking to a hand-rolled HTTP/1.1 server over raw TCP sockets</p>
+      </div>
+    </div>
+    <nav class="links">
+      <a href="/" title="Static landing page">← Landing</a>
+      <button
+        type="button"
+        class="toggle-sb"
+        (click)="toggleSidebar()"
+        [attr.aria-pressed]="sidebarOpen()"
+        title="Toggle history sidebar"
+      >
+        @if (sidebarOpen()) {
+          ⟨ Hide history
+        } @else {
+          History ({{ historyCount() }}) ⟩
+        }
+      </button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <aside class="aside">
+      <app-history-sidebar
+        [entries]="history()"
+        [selectedId]="selectedHistoryId()"
+        (selectEntry)="onSelectHistory($event)"
+        (removeEntry)="onRemoveHistory($event)"
+        (clearAll)="onClearHistory()"
+      />
+    </aside>
+
+    <section class="main-pane">
+      <div class="card">
+        <h2>Request</h2>
+        <app-request-builder
+          [request]="request()"
+          [sending]="sending()"
+          (requestChange)="onRequestChange($event)"
+          (send)="onSend()"
+        />
+      </div>
+
+      <div class="card">
+        <h2>Response</h2>
+        <app-response-viewer
+          [response]="response()"
+          [sending]="sending()"
+        />
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottombar">
+    Served on a hand-rolled TCP listener · Built with Angular standalone components
+  </footer>
+</div>

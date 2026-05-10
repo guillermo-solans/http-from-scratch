@@ -1,0 +1,94 @@
+@let r = response();
+
+<div class="viewer">
+  @if (!r && !sending()) {
+    <div class="empty-state">
+      <div class="placeholder">
+        <span class="big">↗</span>
+        <p>Send a request to see the response here.</p>
+        <p class="hint">Tip: try one of the quick actions above.</p>
+      </div>
+    </div>
+  }
+
+  @if (sending() && !r) {
+    <div class="empty-state">
+      <div class="placeholder">
+        <span class="big spin">…</span>
+        <p>Waiting for response…</p>
+      </div>
+    </div>
+  }
+
+  @if (r) {
+    <div class="status-bar" [class]="'sc-' + statusClass()">
+      @if (r.error) {
+        <span class="status-code">!</span>
+        <span class="status-text">{{ r.error }}</span>
+      } @else {
+        <span class="status-code">{{ r.status }}</span>
+        <span class="status-text">{{ r.statusText || '—' }}</span>
+      }
+      <span class="meta">
+        <span title="Response time">⏱ {{ r.durationMs }} ms</span>
+        <span title="Body size">⇣ {{ bytesLabel() }}</span>
+        @if (r.bodyContentType) {
+          <span title="Content-Type">{{ r.bodyContentType }}</span>
+        }
+      </span>
+    </div>
+
+    <div class="tabs">
+      <button
+        type="button"
+        [class.active]="activeTab() === 'body'"
+        (click)="setTab('body')"
+      >Body</button>
+      <button
+        type="button"
+        [class.active]="activeTab() === 'headers'"
+        (click)="setTab('headers')"
+      >Headers <span class="count">{{ r.headers.length }}</span></button>
+      <button
+        type="button"
+        [class.active]="activeTab() === 'raw'"
+        (click)="setTab('raw')"
+      >Raw</button>
+      <span class="spacer"></span>
+      <button type="button" class="copy-btn" (click)="copyBody()" title="Copy body to clipboard">Copy</button>
+    </div>
+
+    <div class="tab-content">
+      @switch (activeTab()) {
+        @case ('body') {
+          @if (!r.body) {
+            <p class="empty-body">(empty body)</p>
+          } @else if (bodyView().isJson) {
+            <pre class="code"><code>{{ bodyView().formatted }}</code></pre>
+          } @else {
+            <pre class="code"><code>{{ r.body }}</code></pre>
+          }
+        }
+        @case ('headers') {
+          @if (r.headers.length === 0) {
+            <p class="empty-body">(no response headers)</p>
+          } @else {
+            <table class="headers-table">
+              <tbody>
+                @for (h of r.headers; track h[0] + '|' + h[1]) {
+                  <tr>
+                    <td class="hk">{{ h[0] }}</td>
+                    <td class="hv">{{ h[1] }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+        @case ('raw') {
+          <pre class="code"><code>{{ r.body }}</code></pre>
+        }
+      }
+    </div>
+  }
+</div>

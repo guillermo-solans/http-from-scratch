@@ -1,0 +1,50 @@
+<div class="sidebar">
+  <header class="head">
+    <h2>History</h2>
+    <button
+      type="button"
+      class="clear-btn"
+      (click)="onClear()"
+      [disabled]="entries().length === 0"
+      title="Clear history"
+    >Clear</button>
+  </header>
+
+  @if (entries().length === 0) {
+    <p class="empty">No requests sent yet.</p>
+  } @else {
+    <ul class="list">
+      @for (entry of entries(); track entry.id) {
+        <li
+          class="item"
+          [class.selected]="entry.id === selectedId()"
+          (click)="onSelect(entry)"
+        >
+          <div class="top">
+            <span class="method" [class]="methodColor(entry.request.method)">
+              {{ entry.request.method }}
+            </span>
+            <span class="status-badge" [class]="statusBadge(entry.response.status)">
+              @if (entry.response.error) {
+                ERR
+              } @else {
+                {{ entry.response.status }}
+              }
+            </span>
+            <button
+              type="button"
+              class="remove"
+              (click)="onRemove($event, entry.id)"
+              aria-label="Remove from history"
+            >×</button>
+          </div>
+          <div class="path" [title]="entry.request.url">{{ shortPath(entry.request.url) }}</div>
+          <div class="meta">
+            <span>{{ relativeTime(entry.timestamp) }}</span>
+            <span>{{ entry.response.durationMs }} ms</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

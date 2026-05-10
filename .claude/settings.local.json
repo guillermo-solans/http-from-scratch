@@ -1,7 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(pip install *)"
+      "PowerShell(pip install *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet run *)",
+      "Bash",
+      "Powershell",
+      "Edit",
+      "Write",
+      "*",
+      "mcp__plugin_origen_playwright__browser_take_screenshot",
+      "mcp__plugin_origen_playwright__browser_click",
+      "mcp__plugin_origen_playwright__browser_snapshot",
+      "mcp__plugin_origen_playwright__browser_select_option",
+      "mcp__plugin_origen_playwright__browser_type",
+      "PowerShell(New-Item *)"
     ]
-  }
+  },
+  "spinnerTipsEnabled": true
 }

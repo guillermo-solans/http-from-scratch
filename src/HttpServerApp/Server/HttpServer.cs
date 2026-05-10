@@ -9,12 +9,14 @@ public class HttpServer
     private readonly int _port;
     private readonly Router _router;
     private readonly Func<HttpRequest, Task<HttpResponse>>? _fallback;
+    private readonly RequestDelegate _pipeline;
 
-    public HttpServer(int port, Router router, Func<HttpRequest, Task<HttpResponse>>? fallback = null)
+    public HttpServer(int port, Router router, Func<HttpRequest, Task<HttpResponse>>? fallback = null, MiddlewareChain? middlewares = null)
     {
         _port = port;
         _router = router;
         _fallback = fallback;
+        _pipeline = (middlewares ?? new MiddlewareChain()).Build(DispatchAsync);
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
@@ -81,7 +83,7 @@ public class HttpServer
                 HttpResponse response;
                 try
                 {
-                    response = await DispatchAsync(request).ConfigureAwait(false);
+                    response = await _pipeline(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

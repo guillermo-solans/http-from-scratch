@@ -6,6 +6,7 @@ public class HttpResponse
     public int StatusCode { get; set; } = 200;
     public string ReasonPhrase { get; set; } = "OK";
     public Dictionary<string, string> Headers { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public List<string> SetCookies { get; } = new();
     public string Body { get; set; } = "";
     public byte[]? BodyBytes { get; set; }
 
@@ -23,6 +24,9 @@ public class HttpResponse
 
         foreach (var header in Headers)
             builder.Append($"{header.Key}: {header.Value}\r\n");
+
+        foreach (var cookie in SetCookies)
+            builder.Append($"Set-Cookie: {cookie}\r\n");
 
         builder.Append("\r\n");
 

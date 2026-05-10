@@ -1,0 +1,316 @@
+:host {
+  display: block;
+}
+
+.builder {
+  display: grid;
+  gap: 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.url-row {
+  flex-wrap: wrap;
+}
+
+.method-select {
+  appearance: none;
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0 0.9rem;
+  height: 42px;
+  font-weight: 700;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  cursor: pointer;
+  min-width: 110px;
+  font-size: 0.95rem;
+
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+}
+
+.url-input {
+  flex: 1;
+  min-width: 280px;
+  background: #0b1220;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0 0.9rem;
+  height: 42px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.95rem;
+
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+}
+
+.send-btn {
+  background: var(--accent);
+  color: #0b0b0b;
+  border: 0;
+  height: 42px;
+  padding: 0 1.4rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  min-width: 110px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-soft);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.dot-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0b0b0b;
+  animation: pulse 1s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+
+  .label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-right: 0.25rem;
+  }
+}
+
+.quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid #334155;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #142036;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .qa-method {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+
+  .qa-label {
+    font-size: 0.8rem;
+  }
+}
+
+.headers {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.75rem 1rem 1rem;
+  background: #0b1220;
+
+  legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.5rem;
+    color: var(--accent-soft);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .add-btn {
+    background: transparent;
+    border: 1px dashed #475569;
+    color: var(--muted);
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+
+    &:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  }
+
+  .empty {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0;
+    font-style: italic;
+  }
+}
+
+.header-row {
+  display: grid;
+  grid-template-columns: auto 1fr 1.4fr auto;
+  gap: 0.4rem;
+  align-items: center;
+  margin-top: 0.5rem;
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+  }
+
+  .header-key,
+  .header-value {
+    background: var(--bg);
+    border: 1px solid #334155;
+    border-radius: 4px;
+    color: var(--text);
+    padding: 0.4rem 0.6rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+
+    &:focus {
+      outline: 1px solid var(--accent);
+      border-color: transparent;
+    }
+  }
+
+  .remove-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+
+    &:hover {
+      color: var(--err);
+      border-color: var(--err);
+    }
+  }
+}
+
+.body-block {
+  display: grid;
+  gap: 0.4rem;
+
+  .body-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--accent-soft);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .format-btn {
+    background: transparent;
+    border: 1px solid #334155;
+    color: var(--muted);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+
+    &:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  }
+
+  .body-textarea {
+    background: #0b1220;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.75rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 140px;
+
+    &:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: transparent;
+    }
+  }
+}
+
+.method-get { color: #38bdf8; }
+.method-post { color: #22c55e; }
+.method-put { color: #facc15; }
+.method-patch { color: #c084fc; }
+.method-delete { color: #ef4444; }
+.method-head { color: #94a3b8; }
+.method-options { color: #fb923c; }
+.method-other { color: var(--muted); }
+
+@media (max-width: 720px) {
+  .url-row {
+    .send-btn {
+      flex: 1;
+    }
+    .url-input {
+      flex: 1 1 100%;
+      order: 3;
+    }
+  }
+  .header-row {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'check key remove'
+      '. value value';
+    .check { grid-area: check; }
+    .header-key { grid-area: key; }
+    .header-value { grid-area: value; }
+    .remove-btn { grid-area: remove; }
+  }
+}
